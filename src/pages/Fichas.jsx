@@ -1,191 +1,132 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { dataService } from '../services/dataService';
 
 export default function Fichas() {
   const [fichas, setFichas] = useState([]);
-  const [form, setForm] = useState({
-    mascota: '',
-    especie: 'Perro',
-    edad: '',
-    diagnostico: '',
-    tratamiento: '',
-    fecha: new Date().toISOString().split('T')[0]
-  });
-  const [alerta, setAlerta] = useState(null);
+  const [citas, setCitas] = useState([]);
+  const [busqueda, setBusqueda] = useState('');
+  const session = dataService.getSession();
+  const isAdmin = session?.role === 'admin';
 
   useEffect(() => {
-    cargarFichas();
-  }, []);
+    if (isAdmin) {
+      setFichas(dataService.getFichas());
+      setCitas(dataService.getCitas());
+    }
+  }, [isAdmin]);
 
-  const cargarFichas = () => {
-    setFichas(dataService.getFichas());
-  };
+  // Si no ha iniciado sesión como Admin, se bloquea la vista
+  if (!isAdmin) {
+    return (
+      <div className="container my-5 text-center">
+        <div className="alert alert-danger shadow-sm d-inline-block p-4" style={{ maxWidth: '500px' }}>
+          <h4 className="fw-bold">Acceso Restringido</h4>
+          <p className="mb-0">
+            Restringido exclusivamente para personal autorizado. Debes iniciar sesión como <strong>Administrador</strong>.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
-  const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value
-    });
-  };
+  // Filtrado simultáneo de Fichas y Citas por nombre de mascota
+  const fichasFiltradas = fichas.filter((f) =>
+    (f.mascota || '').toLowerCase().includes(busqueda.toLowerCase())
+  );
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    dataService.guardarFicha(form);
-    setAlerta('Ficha médica creada correctamente');
-    setForm({
-      mascota: '',
-      especie: 'Perro',
-      edad: '',
-      diagnostico: '',
-      tratamiento: '',
-      fecha: new Date().toISOString().split('T')[0]
-    });
-    cargarFichas();
-    setTimeout(() => setAlerta(null), 3000);
-  };
-
-  const handleEliminar = (id) => {
-    dataService.eliminarFicha(id);
-    cargarFichas();
-  };
+  const citasFiltradas = citas.filter((c) =>
+    (c.nombreMascota || c.mascota || '').toLowerCase().includes(busqueda.toLowerCase())
+  );
 
   return (
-    <div className="container mt-4">
-      <h2 className="mb-4 text-primary fw-bold">
-        <i className="bi bi-journal-medical me-2"></i>Fichas Médicas Clónicas
-      </h2>
+    <div className="container my-4">
+      <div className="card shadow-sm border-0 p-4 mb-4">
+        <h2 className="fw-bold mb-1">Consulta de Fichas e Historial Clínico</h2>
+        <p className="text-muted mb-4">Expedientes médicos registrados y citas solicitadas en el sistema.</p>
 
-      {alerta && (
-        <div className="alert alert-success alert-dismissible fade show" role="alert">
-          {alerta}
-        </div>
-      )}
-
-      <div className="row g-4">
-        {/* Formulario */}
-        <div className="col-lg-4">
-          <div className="card shadow-sm border-0">
-            <div className="card-header bg-primary text-white fw-bold">
-              Nueva Ficha Médica
-            </div>
-            <div className="card-body">
-              <form onSubmit={handleSubmit}>
-                <div className="mb-3">
-                  <label className="form-label fw-semibold">Nombre Mascota</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    name="mascota"
-                    value={form.mascota}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div className="row mb-3">
-                  <div className="col-6">
-                    <label className="form-label fw-semibold">Especie</label>
-                    <select
-                      className="form-select"
-                      name="especie"
-                      value={form.especie}
-                      onChange={handleChange}
-                    >
-                      <option value="Perro">Perro</option>
-                      <option value="Gato">Gato</option>
-                      <option value="Exótico">Exótico</option>
-                    </select>
-                  </div>
-                  <div className="col-6">
-                    <label className="form-label fw-semibold">Edad</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="edad"
-                      placeholder="Ej: 2 años"
-                      value={form.edad}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="mb-3">
-                  <label className="form-label fw-semibold">Diagnóstico</label>
-                  <textarea
-                    className="form-control"
-                    name="diagnostico"
-                    rows="2"
-                    value={form.diagnostico}
-                    onChange={handleChange}
-                    required
-                  ></textarea>
-                </div>
-                <div className="mb-3">
-                  <label className="form-label fw-semibold">Tratamiento</label>
-                  <textarea
-                    className="form-control"
-                    name="tratamiento"
-                    rows="2"
-                    value={form.tratamiento}
-                    onChange={handleChange}
-                    required
-                  ></textarea>
-                </div>
-                <button type="submit" className="btn btn-primary w-100 fw-bold">
-                  <i className="bi bi-plus-circle me-1"></i> Registrar Ficha
-                </button>
-              </form>
+        {/* Buscador general por nombre de mascota */}
+        <div className="row mb-4">
+          <div className="col-md-6">
+            <div className="input-group">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Buscar por nombre de mascota..."
+                value={busqueda}
+                onChange={(e) => setBusqueda(e.target.value)}
+              />
+              <button className="btn btn-primary" type="button">Buscar</button>
             </div>
           </div>
         </div>
 
-        {/* Tabla de Fichas */}
-        <div className="col-lg-8">
-          <div className="card shadow-sm border-0">
-            <div className="card-header bg-dark text-white fw-bold d-flex justify-content-between align-items-center">
-              <span>Historial Médico</span>
-              <span className="badge bg-primary fs-6">{fichas.length}</span>
-            </div>
-            <div className="card-body p-0">
-              {fichas.length === 0 ? (
-                <div className="p-4 text-center text-muted">Sin fichas médicas registradas.</div>
+        {/* Seccion 1: Fichas Clínicas */}
+        <h4 className="fw-bold text-primary mb-3">Historial Clínico</h4>
+        <div className="table-responsive mb-5">
+          <table className="table table-hover align-middle border">
+            <thead className="table-dark">
+              <tr>
+                <th>Mascota</th>
+                <th>Especie / Raza</th>
+                <th>Dueño</th>
+                <th>Último Diagnóstico</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              {fichasFiltradas.length > 0 ? (
+                fichasFiltradas.map((f) => (
+                  <tr key={f.id}>
+                    <td><strong>{f.mascota}</strong></td>
+                    <td>{f.especie}</td>
+                    <td>{f.dueno || f.propietario}</td>
+                    <td>{f.diagnostico}</td>
+                    <td><span className="badge bg-success">{f.estado || 'Completado'}</span></td>
+                  </tr>
+                ))
               ) : (
-                <div className="table-responsive">
-                  <table className="table table-hover mb-0 align-middle">
-                    <thead className="table-light">
-                      <tr>
-                        <th>Mascota</th>
-                        <th>Diagnóstico</th>
-                        <th>Tratamiento</th>
-                        <th>Fecha</th>
-                        <th className="text-center">Acciones</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {fichas.map((ficha) => (
-                        <tr key={ficha.id}>
-                          <td>
-                            <strong className="text-primary d-block">{ficha.mascota}</strong>
-                            <small className="text-muted">{ficha.especie} • {ficha.edad}</small>
-                          </td>
-                          <td>{ficha.diagnostico}</td>
-                          <td>{ficha.tratamiento}</td>
-                          <td><small>{ficha.fecha}</small></td>
-                          <td className="text-center">
-                            <button
-                              className="btn btn-outline-danger btn-sm"
-                              onClick={() => handleEliminar(ficha.id)}
-                            >
-                              <i className="bi bi-trash-fill"></i>
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                <tr>
+                  <td colSpan="5" className="text-center text-muted">No se encontraron fichas clínicas.</td>
+                </tr>
               )}
-            </div>
-          </div>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Seccion 2: Citas Programadas Solicitadas */}
+        <h4 className="fw-bold text-primary mb-3">Citas Programadas</h4>
+        <div className="table-responsive">
+          <table className="table table-hover align-middle border">
+            <thead className="table-dark">
+              <tr>
+                <th>Mascota</th>
+                <th>Dueño / Contacto</th>
+                <th>Servicio</th>
+                <th>Fecha y Hora</th>
+                <th>Motivo / Observación</th>
+              </tr>
+            </thead>
+            <tbody>
+              {citasFiltradas.length > 0 ? (
+                citasFiltradas.map((c, i) => (
+                  <tr key={c.id || i}>
+                    <td><strong>{c.nombreMascota || c.mascota}</strong></td>
+                    <td>
+                      <div>{c.nombreDueno || c.propietario}</div>
+                      <small className="text-muted">{c.emailDueno}</small>
+                    </td>
+                    <td>{c.servicio}</td>
+                    <td>{c.fechaCita || c.fecha}</td>
+                    <td>{c.motivo || 'Sin observaciones'}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5" className="text-center text-muted">No hay citas programadas registradas.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

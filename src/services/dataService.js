@@ -1,57 +1,32 @@
-const KEYS = {
-  CITAS: 'vet_citas',
-  FICHAS: 'vet_fichas'
-};
-
-const initialCitas = [
-  { id: 1, mascota: 'Firulais', propietario: 'Juan Pérez', fecha: '2026-11-05', hora: '10:00', motivo: 'Vacunación' }
-];
-
-const initialFichas = [
-  { id: 1, mascota: 'Pelusa', especie: 'Gato', edad: '3 años', diagnostico: 'Sano / Control sano', tratamiento: 'Desparasitación interna', fecha: '2026-10-20' }
-];
-
 export const dataService = {
-  init() {
-    if (!localStorage.getItem(KEYS.CITAS)) {
-      localStorage.setItem(KEYS.CITAS, JSON.stringify(initialCitas));
+  // Manejo de Sesión en localStorage
+  login: (email, password) => {
+    if ((email === 'admin@sanmarcos.cl' || email === 'admin') && password === 'admin123') {
+      const session = { isLogged: true, role: 'admin', user: 'Administrador' };
+      localStorage.setItem('userSession', JSON.stringify(session));
+      return { success: true, session };
     }
-    if (!localStorage.getItem(KEYS.FICHAS)) {
-      localStorage.setItem(KEYS.FICHAS, JSON.stringify(initialFichas));
-    }
+    return { success: false, message: 'Credenciales incorrectas' };
   },
 
-  // Citas
-  getCitas() {
-    this.init();
-    return JSON.parse(localStorage.getItem(KEYS.CITAS)) || [];
-  },
-  guardarCita(nuevaCita) {
-    const citas = this.getCitas();
-    const citaConId = { ...nuevaCita, id: Date.now() };
-    citas.push(citaConId);
-    localStorage.setItem(KEYS.CITAS, JSON.stringify(citas));
-    return citaConId;
-  },
-  eliminarCita(id) {
-    const citas = this.getCitas().filter(c => c.id !== id);
-    localStorage.setItem(KEYS.CITAS, JSON.stringify(citas));
+  logout: () => {
+    localStorage.removeItem('userSession');
   },
 
-  // Fichas Médicas
-  getFichas() {
-    this.init();
-    return JSON.parse(localStorage.getItem(KEYS.FICHAS)) || [];
+  getSession: () => {
+    const session = localStorage.getItem('userSession');
+    return session ? JSON.parse(session) : null;
   },
-  guardarFicha(nuevaFicha) {
-    const fichas = this.getFichas();
-    const fichaConId = { ...nuevaFicha, id: Date.now() };
-    fichas.push(fichaConId);
-    localStorage.setItem(KEYS.FICHAS, JSON.stringify(fichas));
-    return fichaConId;
+
+  // Obtener Fichas y Citas
+  getFichas: () => {
+    return JSON.parse(localStorage.getItem('fichasClinicas')) || [
+      { id: 1, mascota: 'Toby', especie: 'Perro', dueno: 'Marcela Gómez', diagnostico: 'Control General', estado: 'Completado' },
+      { id: 2, mascota: 'Pelusa', especie: 'Gato', dueno: 'Carlos Pérez', diagnostico: 'Vacunación Triple Felina', estado: 'Pendiente' }
+    ];
   },
-  eliminarFicha(id) {
-    const fichas = this.getFichas().filter(f => f.id !== id);
-    localStorage.setItem(KEYS.FICHAS, JSON.stringify(fichas));
+
+  getCitas: () => {
+    return JSON.parse(localStorage.getItem('citasMedicas')) || [];
   }
 };

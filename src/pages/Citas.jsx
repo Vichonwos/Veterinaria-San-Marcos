@@ -1,189 +1,168 @@
-import { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { dataService } from '../services/dataService';
 
 export default function Citas() {
-  const [citas, setCitas] = useState([]);
-  const [form, setForm] = useState({
-    mascota: '',
-    propietario: '',
-    fecha: '',
-    hora: '',
+  const [formData, setFormData] = useState({
+    nombreDueno: '',
+    emailDueno: '',
+    nombreMascota: '',
+    especie: '',
+    servicio: '',
+    fechaCita: '',
     motivo: ''
   });
-  const [alerta, setAlerta] = useState(null);
 
-  useEffect(() => {
-    cargarCitas();
-  }, []);
-
-  const cargarCitas = () => {
-    const datos = dataService.getCitas();
-    setCitas(datos);
-  };
+  const [mensaje, setMensaje] = useState('');
 
   const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value
-    });
+    setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    dataService.guardarCita(form);
-    setAlerta({ tipo: 'success', texto: '¡Cita registrada con éxito!' });
-    setForm({ mascota: '', propietario: '', fecha: '', hora: '', motivo: '' });
-    cargarCitas();
+    
+    // Guardar la cita en localStorage
+    const citasActuales = JSON.parse(localStorage.getItem('citasMedicas')) || [];
+    const nuevaCita = { ...formData, id: Date.now() };
+    localStorage.setItem('citasMedicas', JSON.stringify([...citasActuales, nuevaCita]));
 
-    setTimeout(() => setAlerta(null), 3000);
-  };
+    // Mostrar mensaje de éxito y limpiar el formulario
+    setMensaje('¡Solicitud de cita enviada con éxito! Nos pondremos en contacto.');
+    setFormData({
+      nombreDueno: '',
+      emailDueno: '',
+      nombreMascota: '',
+      especie: '',
+      servicio: '',
+      fechaCita: '',
+      motivo: ''
+    });
 
-  const handleEliminar = (id) => {
-    dataService.eliminarCita(id);
-    cargarCitas();
+    setTimeout(() => setMensaje(''), 4000);
   };
 
   return (
-    <div className="container mt-4">
-      <h2 className="mb-4 text-primary fw-bold">
-        <i className="bi bi-calendar-plus me-2"></i>Gestión de Citas Médicas
-      </h2>
+    <div className="container my-5" style={{ maxWidth: '700px' }}>
+      <div className="card shadow-sm border-0 p-4">
+        <h2 className="fw-bold mb-2 text-center">Solicitud de Cita Médica</h2>
+        <p className="text-center text-muted mb-4">
+          Selecciona un servicio de nuestro catálogo y completa el formulario para agendar a tu mascota.
+        </p>
 
-      {alerta && (
-        <div className={`alert alert-${alerta.tipo} alert-dismissible fade show`} role="alert">
-          {alerta.texto}
-        </div>
-      )}
+        {mensaje && (
+          <div className="alert alert-success text-center fw-bold" role="alert">
+            {mensaje}
+          </div>
+        )}
 
-      <div className="row g-4">
-        {/* Formulario de registro */}
-        <div className="col-lg-4">
-          <div className="card shadow-sm border-0">
-            <div className="card-header bg-primary text-white fw-bold">
-              Agendar Nueva Cita
+        <form onSubmit={handleSubmit}>
+          <div className="row g-3">
+            <div className="col-md-6">
+              <label htmlFor="nombreDueno" className="form-label fw-semibold">Nombre del Dueño:</label>
+              <input
+                type="text"
+                className="form-control"
+                id="nombreDueno"
+                placeholder="Ej: Marcela Gómez"
+                value={formData.nombreDueno}
+                onChange={handleChange}
+                required
+              />
             </div>
-            <div className="card-body">
-              <form onSubmit={handleSubmit}>
-                <div className="mb-3">
-                  <label className="form-label fw-semibold">Nombre Mascota</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    name="mascota"
-                    value={form.mascota}
-                    onChange={handleChange}
-                    placeholder="Ej: Firulais"
-                    required
-                  />
-                </div>
-                <div className="mb-3">
-                  <label className="form-label fw-semibold">Nombre Propietario</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    name="propietario"
-                    value={form.propietario}
-                    onChange={handleChange}
-                    placeholder="Ej: Juan Pérez"
-                    required
-                  />
-                </div>
-                <div className="row">
-                  <div className="col-6 mb-3">
-                    <label className="form-label fw-semibold">Fecha</label>
-                    <input
-                      type="date"
-                      className="form-control"
-                      name="fecha"
-                      value={form.fecha}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-                  <div className="col-6 mb-3">
-                    <label className="form-label fw-semibold">Hora</label>
-                    <input
-                      type="time"
-                      className="form-control"
-                      name="hora"
-                      value={form.hora}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="mb-3">
-                  <label className="form-label fw-semibold">Motivo Consulta</label>
-                  <textarea
-                    className="form-control"
-                    name="motivo"
-                    rows="3"
-                    value={form.motivo}
-                    onChange={handleChange}
-                    placeholder="Ej: Vacunación o control"
-                    required
-                  ></textarea>
-                </div>
-                <button type="submit" className="btn btn-primary w-100 fw-bold">
-                  <i className="bi bi-check-circle me-1"></i> Guardar Cita
-                </button>
-              </form>
+
+            <div className="col-md-6">
+              <label htmlFor="emailDueno" className="form-label fw-semibold">Correo Electrónico:</label>
+              <input
+                type="email"
+                className="form-control"
+                id="emailDueno"
+                placeholder="correo@ejemplo.com"
+                value={formData.emailDueno}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="col-md-6">
+              <label htmlFor="nombreMascota" className="form-label fw-semibold">Nombre de la Mascota:</label>
+              <input
+                type="text"
+                className="form-control"
+                id="nombreMascota"
+                placeholder="Ej: Toby"
+                value={formData.nombreMascota}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="col-md-6">
+              <label htmlFor="especie" className="form-label fw-semibold">Especie:</label>
+              <select
+                className="form-select"
+                id="especie"
+                value={formData.especie}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Seleccione especie...</option>
+                <option value="Perro">Perro</option>
+                <option value="Gato">Gato</option>
+                <option value="Conejo">Conejo</option>
+                <option value="Ave">Ave</option>
+              </select>
+            </div>
+
+            <div className="col-12">
+              <label htmlFor="servicio" className="form-label fw-semibold">Servicio Solicitado:</label>
+              <select
+                className="form-select"
+                id="servicio"
+                value={formData.servicio}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Seleccione un servicio...</option>
+                <option value="Consulta general ($15.000)">Consulta general - $15.000</option>
+                <option value="Consulta urgencia ($25.000)">Consulta urgencia - $25.000</option>
+                <option value="Vacuna antirrábica ($12.000)">Vacuna antirrábica - $12.000</option>
+                <option value="Vacuna sextuple ($18.000)">Vacuna sextuple - $18.000</option>
+                <option value="Esterilización ($60.000)">Esterilización - $60.000</option>
+                <option value="Desparasitación ($8.000)">Desparasitación - $8.000</option>
+              </select>
+            </div>
+
+            <div className="col-12">
+              <label htmlFor="fechaCita" className="form-label fw-semibold">Fecha y Hora Preferida:</label>
+              <input
+                type="datetime-local"
+                className="form-control"
+                id="fechaCita"
+                value={formData.fechaCita}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="col-12">
+              <label htmlFor="motivo" className="form-label fw-semibold">Observaciones / Motivo:</label>
+              <textarea
+                className="form-control"
+                id="motivo"
+                rows="3"
+                placeholder="Síntomas u observaciones adicionales..."
+                value={formData.motivo}
+                onChange={handleChange}
+              ></textarea>
+            </div>
+
+            <div className="col-12 mt-4">
+              <button type="submit" className="btn btn-primary w-100 fw-bold py-2">
+                Enviar Solicitud de Cita
+              </button>
             </div>
           </div>
-        </div>
-
-        {/* Tabla de registros guardados */}
-        <div className="col-lg-8">
-          <div className="card shadow-sm border-0">
-            <div className="card-header bg-dark text-white fw-bold d-flex justify-content-between align-items-center">
-              <span>Citas Programadas</span>
-              <span className="badge bg-primary fs-6">{citas.length}</span>
-            </div>
-            <div className="card-body p-0">
-              {citas.length === 0 ? (
-                <div className="p-4 text-center text-muted">
-                  No hay citas registradas en el sistema.
-                </div>
-              ) : (
-                <div className="table-responsive">
-                  <table className="table table-hover mb-0 align-middle">
-                    <thead className="table-light">
-                      <tr>
-                        <th>Mascota</th>
-                        <th>Dueño</th>
-                        <th>Fecha / Hora</th>
-                        <th>Motivo</th>
-                        <th className="text-center">Acción</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {citas.map((cita) => (
-                        <tr key={cita.id}>
-                          <td className="fw-bold text-primary">{cita.mascota}</td>
-                          <td>{cita.propietario}</td>
-                          <td>
-                            <small className="d-block fw-semibold">{cita.fecha}</small>
-                            <small className="text-muted">{cita.hora}</small>
-                          </td>
-                          <td>{cita.motivo}</td>
-                          <td className="text-center">
-                            <button
-                              className="btn btn-outline-danger btn-sm"
-                              onClick={() => handleEliminar(cita.id)}
-                              title="Eliminar cita"
-                            >
-                              <i className="bi bi-trash-fill"></i>
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+        </form>
       </div>
     </div>
   );

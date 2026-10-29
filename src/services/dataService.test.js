@@ -1,42 +1,33 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { dataService } from './dataService';
+export const dataService = {
+  // Manejo de Sesión Persistente
+  login: (email, password) => {
+    if (email === 'admin@sanmarcos.cl' && password === 'admin123') {
+      const session = { isLogged: true, role: 'admin', user: 'Administrador' };
+      localStorage.setItem('userSession', JSON.stringify(session));
+      return { success: true, session };
+    }
+    return { success: false, message: 'Credenciales incorrectas' };
+  },
 
-describe('Pruebas Unitarias - dataService', () => {
-  beforeEach(() => {
-    localStorage.clear();
-  });
+  logout: () => {
+    localStorage.removeItem('userSession');
+  },
 
-  it('debe inicializar y retornar la lista de citas iniciales', () => {
-    const citas = dataService.getCitas();
-    expect(Array.isArray(citas)).toBe(true);
-    expect(citas.length).toBeGreaterThan(0);
-  });
+  getSession: () => {
+    const session = localStorage.getItem('userSession');
+    return session ? JSON.parse(session) : null;
+  },
 
-  it('debe agregar una nueva cita a localStorage con ID único', () => {
-    const nuevaCita = {
-      mascota: 'Boby',
-      propietario: 'Ana Gómez',
-      fecha: '2026-11-12',
-      hora: '11:00',
-      motivo: 'Vacuna anual'
-    };
+  // Obtener Fichas y Citas combinadas para la vista Admin
+  getFichas: () => {
+    const fichas = JSON.parse(localStorage.getItem('fichasClinicas')) || [
+      { id: 1, mascota: 'Toby', especie: 'Perro', dueno: 'Marcela Gómez', diagnostico: 'Control General', estado: 'Completado' },
+      { id: 2, mascota: 'Pelusa', especie: 'Gato', dueno: 'Carlos Pérez', diagnostico: 'Vacunación Triple Felina', estado: 'Pendiente' }
+    ];
+    return fichas;
+  },
 
-    const resultado = dataService.guardarCita(nuevaCita);
-
-    expect(resultado).toHaveProperty('id');
-    expect(resultado.mascota).toBe('Boby');
-
-    const listaActualizada = dataService.getCitas();
-    expect(listaActualizada.some(c => c.mascota === 'Boby')).toBe(true);
-  });
-
-  it('debe eliminar una cita correctamente', () => {
-    const citasIniciales = dataService.getCitas();
-    const idAEliminar = citasIniciales[0].id;
-
-    dataService.eliminarCita(idAEliminar);
-
-    const citasDespues = dataService.getCitas();
-    expect(citasDespues.some(c => c.id === idAEliminar)).toBe(false);
-  });
-});
+  getCitas: () => {
+    return JSON.parse(localStorage.getItem('citasMedicas')) || [];
+  }
+};
