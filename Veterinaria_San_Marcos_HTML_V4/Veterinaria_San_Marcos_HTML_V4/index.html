@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clínica Veterinaria San Marcos - Rancagua</title>
+    <!-- CSS Externo -->
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- Leaflet CSS para el Mapa -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <h1>🐾 Veterinaria San Marcos</h1>
+            <p>Cuidando a tus mejores amigos en Rancagua desde 2009</p>
+        </div>
+        <nav class="navbar">
+    <div class="menu-toggle" id="mobile-menu">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+    </div>
+    <ul class="nav-list">
+    <li><a href="index.html">Inicio</a></li>
+    <li><a href="citas.html">Solicitar Cita</a></li>  
+    
+    <!-- Se muestra a clientes y trabajadores logueados -->
+    <li class="auth-only"><a href="fichas.html">Ver Fichas Clínicas</a></li>
+    
+    <!-- Se muestra SOLO a los trabajadores de la veterinaria -->
+    <li class="admin-only"><a href="admin.html">Panel Admin</a></li>        
+    
+    <!-- Cambia automáticamente según el estado de la sesión -->
+    <li class="guest-only"><a href="login.html" class="btn-login">Iniciar Sesión</a></li>
+    <li class="auth-only"><a href="#" id="btnLogout" class="btn-login">Cerrar Sesión</a></li>
+</ul>
+
+</nav>
+        
+    </header>
+
+    <main>
+        <section class="hero">
+            <h2>Excelencia en Salud y Bienestar Animal</h2>
+            <p>Atendemos perros, gatos, conejos y aves con un equipo profesional y comprometido.</p>
+            <div class="hero-buttons">
+                <a href="citas.html" class="btn-primary">Reservar una Cita Online</a>
+            </div>
+        </section>
+
+        <section class="servicios-grid">
+            <article class="card">
+                <h3>Consulta General</h3>
+                <p>Evaluación médica integral para detectar cualquier anomalía a tiempo.</p>
+            </article>
+            <article class="card">
+                <h3>Vacunación y Desparasitación</h3>
+                <p>Mantén al día el calendario de inmunización de tu mascota de forma segura.</p>
+            </article>
+            <article class="card">
+                <h3>Cirugía Menor</h3>
+                <p>Pabellón equipado con altos estándares de seguridad y anestesia controlada.</p>
+            </article>
+        </section>
+
+        <section class="map-section">
+            <h2>Nuestra Ubicación en Rancagua</h2>
+            <p>Visítanos en nuestras instalaciones. Contamos con estacionamiento y zona de espera cómoda.</p>
+            <div id="map" style="height: 400px; width: 100%; border-radius: 8px; margin-top: 1rem;"></div>
+        </section>
+    </main>
+
+    <footer>
+        <p>📍 Dirección: Av. Libertador Bernardo O'Higgins 456, Rancagua | 📞 Teléfono: +56 72 2234567</p>
+        <p>&copy; 2026 Clínica Veterinaria San Marcos. Todos los derechos reservados.</p>
+    </footer>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

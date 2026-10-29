@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitud de Citas - Veterinaria San Marcos</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <h1>🐾 Veterinaria San Marcos</h1>
+        </div>
+        <nav class="navbar">
+            <div class="menu-toggle" id="mobile-menu">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+            <ul class="nav-list">
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="citas.html" class="active">Solicitar Cita</a></li>
+                <li class="admin-only"><a href="fichas.html">Fichas Clínicas</a></li>
+                <li class="admin-only"><a href="admin.html">Panel Admin</a></li>
+                <li class="guest-only"><a href="login.html" class="btn-login">Iniciar Sesión</a></li>
+                <li class="auth-only"><a href="#" id="btnLogout" class="btn-login">Cerrar Sesión</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container-form">
+        <section class="form-section">
+            <h2>Solicitud de Cita Médica</h2>
+            <p>Selecciona un servicio de nuestro catálogo y completa el formulario para agendar la atención de tu mascota.</p>
+            
+            <div id="mensaje-feedback" class="feedback-box" style="display: none; padding: 1rem; margin-bottom: 1rem; border-radius: 5px; background-color: #d4edda; color: #155724; font-weight: bold;"></div>
+
+            <form id="formCita">
+                <div class="campo">
+                    <label for="nombreDueno">Nombre del Dueño:</label>
+                    <input type="text" id="nombreDueno" placeholder="Ej: Marcela Gómez" required>
+                </div>
+                <div class="campo">
+                    <label for="emailDueno">Correo Electrónico:</label>
+                    <input type="email" id="emailDueno" placeholder="correo@ejemplo.com" required>
+                </div>
+                <div class="campo">
+                    <label for="nombreMascota">Nombre de la Mascota:</label>
+                    <input type="text" id="nombreMascota" placeholder="Ej: Toby" required>
+                </div>
+                <div class="campo">
+                    <label for="especie">Especie:</label>
+                    <select id="especie" required>
+                        <option value="">Seleccione especie...</option>
+                        <option value="Perro">Perro</option>
+                        <option value="Gato">Gato</option>
+                        <option value="Conejo">Conejo</option>
+                        <option value="Ave">Ave</option>
+                    </select>
+                </div>
+
+                <!-- CATÁLOGO DE SERVICIOS INTEGRADOS -->
+                <div class="campo">
+                    <label for="servicio">Servicio Solicitado (Catálogo):</label>
+                    <select id="servicio" required>
+                        <option value="">Seleccione un servicio del catálogo...</option>
+                        <optgroup label="Consultas">
+                            <option value="Consulta general ($15.000)">Consulta general - $15.000 (30 min)</option>
+                            <option value="Consulta urgencia ($25.000)">Consulta urgencia - $25.000 (30 min)</option>
+                            <option value="Control postoperatorio ($10.000)">Control postoperatorio - $10.000 (20 min)</option>
+                            <option value="Consulta ave / conejo ($18.000)">Consulta ave / conejo - $18.000 (30 min)</option>
+                            <option value="Segunda opinión médica ($20.000)">Segunda opinión médica - $20.000 (40 min)</option>
+                        </optgroup>
+                        <optgroup label="Vacunación">
+                            <option value="Vacuna antirrábica canina ($12.000)">Vacuna antirrábica canina - $12.000</option>
+                            <option value="Vacuna sextuple canina ($18.000)">Vacuna sextuple canina - $18.000</option>
+                            <option value="Vacuna bivalente felina ($15.000)">Vacuna bivalente felina - $15.000</option>
+                            <option value="Vacuna triple felina ($17.000)">Vacuna triple felina - $17.000</option>
+                            <option value="Vacuna Bordetella canina ($14.000)">Vacuna Bordetella canina - $14.000</option>
+                            <option value="Vacuna antirrábica felina ($12.000)">Vacuna antirrábica felina - $12.000</option>
+                        </optgroup>
+                        <optgroup label="Cirugía">
+                            <option value="Esterilización hembra canina ($80.000)">Esterilización hembra canina - $80.000</option>
+                            <option value="Esterilización macho canino ($60.000)">Esterilización macho canino - $60.000</option>
+                            <option value="Esterilización hembra felina ($65.000)">Esterilización hembra felina - $65.000</option>
+                            <option value="Esterilización macho felino ($50.000)">Esterilización macho felino - $50.000</option>
+                            <option value="Extirpación de tumor cutáneo ($120.000)">Extirpación de tumor cutáneo - $120.000</option>
+                            <option value="Cesárea de urgencia ($180.000)">Cesárea de urgencia - $180.000</option>
+                        </optgroup>
+                        <optgroup label="Desparasitación">
+                            <option value="Desparasitación interna pequeños (<10 kg) ($8.000)">Desparasitación interna pequeños (<10 kg) - $8.000</option>
+                            <option value="Desparasitación interna medianos (10-25 kg) ($9.500)">Desparasitación interna medianos (10-25 kg) - $9.500</option>
+                            <option value="Desparasitación interna grandes (>25 kg) ($11.000)">Desparasitación interna grandes (>25 kg) - $11.000</option>
+                            <option value="Desparasitación interna felina ($8.000)">Desparasitación interna felina - $8.000</option>
+                            <option value="Antiparasitario externo (pipeta) ($7.500)">Antiparasitario externo (pipeta) - $7.500</option>
+                        </optgroup>
+                        <optgroup label="Exámenes">
+                            <option value="Hemograma completo ($22.000)">Hemograma completo - $22.000</option>
+                            <option value="Perfil bioquímico completo ($35.000)">Perfil bioquímico completo - $35.000</option>
+                            <option value="Radiografía (1 proyección) ($28.000)">Radiografía - $28.000</option>
+                            <option value="Ecografía abdominal ($45.000)">Ecografía abdominal - $45.000</option>
+                            <option value="Test de leishmaniasis ($18.000)">Test de leishmaniasis - $18.000</option>
+                        </optgroup>
+                        <optgroup label="Otros">
+                            <option value="Corte de uñas ($5.000)">Corte de uñas - $5.000</option>
+                            <option value="Limpieza dental ($55.000)">Limpieza dental - $55.000</option>
+                            <option value="Microchip identificación ($15.000)">Microchip identificación - $15.000</option>
+                            <option value="Hospitalización por día ($30.000)">Hospitalización (por día) - $30.000</option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <div class="campo">
+                    <label for="fechaCita">Fecha y Hora Preferida:</label>
+                    <input type="datetime-local" id="fechaCita" required>
+                </div>
+                <div class="campo">
+                    <label for="motivo">Observaciones / Motivo:</label>
+                    <textarea id="motivo" rows="3" placeholder="Síntomas u observaciones adicionales..."></textarea>
+                </div>
+                <button type="submit" class="btn-submit">Enviar Solicitud de Cita</button>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <p>📍 Rancagua | 📞 +56 72 2234567</p>
+        <p>&copy; 2026 Clínica Veterinaria San Marcos.</p>
+    </footer>
+    <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial Clínico - Veterinaria San Marcos</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <h1>🐾 Veterinaria San Marcos</h1>
+        </div>
+        <nav class="navbar">
+            <div class="menu-toggle" id="mobile-menu">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+            <ul class="nav-list">
+                <li><a href="index.html">Inicio</a></li>
+                <li class="guest-only"><a href="citas.html">Solicitar cita</a></li>  
+                <li class="auth-only"><a href="fichas.html" class="active">Fichas Clínicas</a></li>
+                <li class="admin-only"><a href="admin.html">Gestión de Usuarios</a></li>
+                <li class="guest-only"><a href="login.html" class="btn-login">Iniciar Sesión</a></li>
+                <li class="auth-only"><a href="#" id="btnLogout" class="btn-login">Cerrar Sesión</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container-main">
+        <section class="content-box">
+            <h2>Consulta de Fichas e Historial Clínico</h2>
+            <p>Expedientes médicos registrados y citas solicitadas en el sistema.</p>
+            
+            <div class="search-bar">
+                <input type="text" id="busquedaMascota" placeholder="Buscar ">
+                <button type="button" class="btn-primary">Buscar</button>
+            </div>
+
+            <div class="table-container" style="margin-top: 2rem;">
+                <table class="styled-table">
+                    <thead>
+                        <tr>
+                            <th>Mascota</th>
+                            <th>Especie / Raza</th>
+                            <th>Dueño</th>
+                            <th>Último Diagnóstico</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <!-- Un solo tbody limpio. JS inyectará las filas de forma dinámica y privada -->
+                    <tbody id="tablaFichasBody"></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Restringido exclusivamente para personal autorizado.</p>
+        <p>&copy; 2026 Clínica Veterinaria San Marcos.</p>
+    </footer>
+    <script src="js/main.js"></script>
+</body>
+</html>
