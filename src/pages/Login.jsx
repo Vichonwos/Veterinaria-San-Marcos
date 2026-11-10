@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { dataService } from '../services/dataService';
 
 export default function Login() {
@@ -12,7 +12,11 @@ export default function Login() {
     e.preventDefault();
     const res = dataService.login(email, password);
     if (res.success) {
-      navigate('/fichas');
+      if (res.session.role === 'admin') {
+        navigate('/fichas');
+      } else {
+        navigate('/citas');
+      }
     } else {
       setError(res.message);
     }
@@ -23,7 +27,7 @@ export default function Login() {
       <div className="card shadow-sm border-0 p-4">
         <h2 className="text-center fw-bold mb-2">Acceso al Sistema</h2>
         <p className="text-center text-muted small mb-4">
-          Ingresa tus credenciales seguras protegidas con token.
+          Ingresa tus credenciales de cliente o administrador.
         </p>
 
         {error && (
@@ -38,7 +42,7 @@ export default function Login() {
             <input
               type="email"
               className="form-control"
-              placeholder="admin@sanmarcos.cl"
+              placeholder="usuario@ejemplo.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -55,9 +59,12 @@ export default function Login() {
               required
             />
           </div>
-          <button type="submit" className="btn btn-primary w-100 fw-bold">
+          <button type="submit" className="btn btn-primary w-100 fw-bold mb-3">
             Ingresar
           </button>
+          <div className="text-center small">
+            ¿No tienes cuenta? <Link to="/registro">Regístrate como cliente</Link>
+          </div>
         </form>
       </div>
     </div>

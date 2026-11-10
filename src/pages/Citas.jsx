@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { dataService } from '../services/dataService';
 
 export default function Citas() {
+  const session = dataService.getSession();
   const [formData, setFormData] = useState({
-    nombreDueno: '',
-    emailDueno: '',
+    nombreDueno: session?.user || '',
+    emailDueno: session?.email || '',
     nombreMascota: '',
     especie: '',
     servicio: '',
@@ -14,23 +16,38 @@ export default function Citas() {
 
   const [mensaje, setMensaje] = useState('');
 
+  // Bloqueo si no hay sesión iniciada
+  if (!session?.isLogged) {
+    return (
+      <div className="container my-5 text-center">
+        <div className="card shadow-sm border-0 p-5 mx-auto" style={{ maxWidth: '550px' }}>
+          <h3 className="fw-bold mb-3">Inicio de Sesión Requerido</h3>
+          <p className="text-muted mb-4">
+            Para poder agendar una cita médica debes contar con una sesión activa.
+          </p>
+          <div className="d-flex justify-content-center gap-3">
+            <Link to="/login" className="btn btn-primary fw-bold px-4">Iniciar Sesión</Link>
+            <Link to="/registro" className="btn btn-outline-primary fw-bold px-4">Crear Cuenta</Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    // Guardar la cita en localStorage
     const citasActuales = JSON.parse(localStorage.getItem('citasMedicas')) || [];
     const nuevaCita = { ...formData, id: Date.now() };
     localStorage.setItem('citasMedicas', JSON.stringify([...citasActuales, nuevaCita]));
 
-    // Mostrar mensaje de éxito y limpiar el formulario
-    setMensaje('¡Solicitud de cita enviada con éxito! Nos pondremos en contacto.');
+    setMensaje('¡Solicitud de cita enviada con éxito!');
     setFormData({
-      nombreDueno: '',
-      emailDueno: '',
+      nombreDueno: session.user,
+      emailDueno: session.email,
       nombreMascota: '',
       especie: '',
       servicio: '',
@@ -46,7 +63,7 @@ export default function Citas() {
       <div className="card shadow-sm border-0 p-4">
         <h2 className="fw-bold mb-2 text-center">Solicitud de Cita Médica</h2>
         <p className="text-center text-muted mb-4">
-          Selecciona un servicio de nuestro catálogo y completa el formulario para agendar a tu mascota.
+          Bienvenido <strong>{session.user}</strong>. Completa los datos para agendar tu atención.
         </p>
 
         {mensaje && (
@@ -63,7 +80,6 @@ export default function Citas() {
                 type="text"
                 className="form-control"
                 id="nombreDueno"
-                placeholder="Ej: Marcela Gómez"
                 value={formData.nombreDueno}
                 onChange={handleChange}
                 required
@@ -76,7 +92,6 @@ export default function Citas() {
                 type="email"
                 className="form-control"
                 id="emailDueno"
-                placeholder="correo@ejemplo.com"
                 value={formData.emailDueno}
                 onChange={handleChange}
                 required

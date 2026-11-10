@@ -1,49 +1,97 @@
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import { dataService } from '../services/dataService';
 
 export default function Admin() {
-  const navigate = useNavigate();
-  const citasCount = dataService.getCitas().length;
-  const fichasCount = dataService.getFichas().length;
+  const [usuarios, setUsuarios] = useState([]);
+  const session = dataService.getSession();
+  const isAdmin = session?.role === 'admin';
 
-  const handleLogout = () => {
-    localStorage.removeItem('vet_auth');
-    navigate('/login');
+  useEffect(() => {
+    if (isAdmin) {
+      setUsuarios(dataService.getUsuarios());
+    }
+  }, [isAdmin]);
+
+  if (!isAdmin) {
+    return (
+      <div className="container my-5 text-center">
+        <div className="alert alert-danger shadow-sm d-inline-block p-4" style={{ maxWidth: '500px' }}>
+          <h4 className="fw-bold">Acceso Restringido</h4>
+          <p className="mb-0">
+            Esta sección es exclusiva para el <strong>Personal Administrador</strong>.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const handleToggleEstado = (id) => {
+    const nuevosUsuarios = dataService.toggleEstadoUsuario(id);
+    setUsuarios([...nuevosUsuarios]);
   };
 
   return (
-    <div className="container mt-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="text-primary fw-bold mb-0">
-          <i className="bi bi-speedometer2 me-2"></i>Panel de Control
-        </h2>
-        <button className="btn btn-outline-danger fw-bold" onClick={handleLogout}>
-          <i className="bi bi-box-arrow-right me-1"></i> Cerrar Sesión
-        </button>
-      </div>
+    <div className="container my-4">
+      <div className="card shadow-sm border-0 p-4">
+        <h2 className="fw-bold mb-2">Gestión de Usuarios y Roles</h2>
+        <p className="text-muted mb-4">
+          Desde aquí puedes monitorear y gestionar a los usuarios y trabajadores registrados en el sistema.
+        </p>
 
-      <div className="row g-4">
-        <div className="col-md-6">
-          <div className="card border-0 shadow-sm bg-primary text-white p-3">
-            <div className="card-body d-flex justify-content-between align-items-center">
-              <div>
-                <h6 className="text-white-50 text-uppercase fw-bold">Citas Registradas</h6>
-                <h1 className="display-4 fw-bold mb-0">{citasCount}</h1>
-              </div>
-              <i className="bi bi-calendar-check display-3 opacity-50"></i>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-6">
-          <div className="card border-0 shadow-sm bg-dark text-white p-3">
-            <div className="card-body d-flex justify-content-between align-items-center">
-              <div>
-                <h6 className="text-white-50 text-uppercase fw-bold">Fichas Clínicas</h6>
-                <h1 className="display-4 fw-bold mb-0">{fichasCount}</h1>
-              </div>
-              <i className="bi bi-journal-medical display-3 opacity-50"></i>
-            </div>
-          </div>
+        <div className="table-responsive">
+          <table className="table table-hover align-middle border">
+            <thead className="table-dark">
+              <tr>
+                <th>ID</th>
+                <th>Nombre Completo</th>
+                <th>Correo Electrónico</th>
+                <th>RUT</th>
+                <th>Rol Asignado</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {usuarios.map((u) => (
+                <tr key={u.id}>
+                  <td><code>#{u.id}</code></td>
+                  <td><strong>{u.nombre} {u.apellido || ''}</strong></td>
+                  <td>{u.email}</td>
+                  <td>{u.rut || 'N/A'}</td>
+                  <td>
+                    <span
+                      className={`badge ${
+                        u.role === 'admin'
+                          ? 'bg-danger'
+                          : u.role === 'medico'
+                          ? 'bg-primary'
+                          : u.role === 'recepcionista'
+                          ? 'bg-info text-dark'
+                          : 'bg-secondary'
+                      }`}
+                    >
+                      {u.role.toUpperCase()}
+                    </span>
+                  </td>
+                  <td>
+                    <span className={`badge ${u.estado === 'Activo' ? 'bg-success' : 'bg-warning text-dark'}`}>
+                      {u.estado || 'Activo'}
+                    </span>
+                  </td>
+                  <td>
+                    {u.role !== 'admin' && (
+                      <button
+                        className={`btn btn-sm ${u.estado === 'Activo' ? 'btn-outline-danger' : 'btn-outline-success'}`}
+                        onClick={() => handleToggleEstado(u.id)}
+                      >
+                        {u.estado === 'Activo' ? 'Desactivar' : 'Activar'}
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
