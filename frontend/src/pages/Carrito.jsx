@@ -5,15 +5,23 @@ import { dataService } from '../services/dataService';
 export default function Carrito() {
   const [carrito, setCarrito] = useState([]);
   const [mensaje, setMensaje] = useState('');
+  const [procesando, setProcesando] = useState(false);
+
   const session = dataService.getSession();
   const navigate = useNavigate();
+
+  // Datos de despacho precargados desde la sesión del usuario
+  const [direccionEntrega, setDireccionEntrega] = useState(session?.direccion || '');
+  const [comunaEntrega, setComunaEntrega] = useState(session?.comuna || '');
+  const [regionEntrega, setRegionEntrega] = useState(session?.region || 'Región Metropolitana de Santiago');
+  const [indicaciones, setIndicaciones] = useState('');
 
   useEffect(() => {
     setCarrito(dataService.getCarrito());
   }, []);
 
   const handleCantidad = (codigo, delta) => {
-    const item = carrito.find((i) => i.codigo === codigo);
+    const item = carrito.find((i) => String(i.codigo) === String(codigo));
     if (!item) return;
     const nuevaCant = item.cantidad + delta;
     const actualizado = dataService.actualizarCantidadCarrito(codigo, nuevaCant);
@@ -32,16 +40,25 @@ export default function Carrito() {
 
   const total = carrito.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
 
-  const handleFinalizar = () => {
+  const handleFinalizar = async () => {
     if (!session?.isLogged) {
       alert('Debes iniciar sesión o registrarte como cliente para finalizar la compra.');
       navigate('/login');
       return;
     }
 
-    const res = dataService.finalizarCompra();
+    setProcesando(true);
+    const res = await dataService.finalizarCompra({
+      direccionEntrega,
+      comunaEntrega,
+      regionEntrega,
+      indicaciones
+    });
+    setProcesando(false);
+
     if (res.success) {
-      setMensaje('¡Compra realizada con éxito! Los productos han sido procesados.');
+      const nroBoleta = res.boleta?.id ? ` — Boleta #${res.boleta.id}` : '';
+      setMensaje(`¡Compra realizada con éxito${nroBoleta}! Los productos han sido procesados.`);
       setCarrito([]);
     } else {
       alert(res.message);
@@ -83,7 +100,7 @@ export default function Carrito() {
                       <td>
                         <strong>{item.nombre}</strong>
                         <br />
-                        <small className="text-muted">{item.presentacion}</small>
+                        <small className="text-muted">{item.presentacion || item.categoria}</small>
                       </td>
                       <td>${item.precio.toLocaleString('es-CL')}</td>
                       <td>
@@ -118,6 +135,41 @@ export default function Carrito() {
               </table>
             </div>
 
+            {session?.isLogged && (
+              <div className="bg-light border rounded p-3 mb-4">
+                <h6 className="fw-bold mb-3">Datos de Entrega</h6>
+                <div className="row g-2">
+                  <div className="col-md-5">
+                    <input
+                      type="text"
+                      className="form-control form-control-sm"
+                      placeholder="Dirección (ej: Los Crisantemos 603)"
+                      value={direccionEntrega}
+                      onChange={(e) => setDireccionEntrega(e.target.value)}
+                    />
+                  </div>
+                  <div className="col-md-3">
+                    <input
+                      type="text"
+                      className="form-control form-control-sm"
+                      placeholder="Comuna"
+                      value={comunaEntrega}
+                      onChange={(e) => setComunaEntrega(e.target.value)}
+                    />
+                  </div>
+                  <div className="col-md-4">
+                    <input
+                      type="text"
+                      className="form-control form-control-sm"
+                      placeholder="Indicaciones (opcional)"
+                      value={indicaciones}
+                      onChange={(e) => setIndicaciones(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="d-flex justify-content-between align-items-center pt-3 border-top">
               <button className="btn btn-outline-secondary btn-sm" onClick={handleVaciar}>
                 Vaciar Carrito
@@ -134,8 +186,12 @@ export default function Carrito() {
                     </Link>
                   </div>
                 ) : (
-                  <button className="btn btn-success btn-lg fw-bold px-4" onClick={handleFinalizar}>
-                    Confirmar y Pagar
+                  <button
+                    className="btn btn-success btn-lg fw-bold px-4"
+                    onClick={handleFinalizar}
+                    disabled={procesando}
+                  >
+                    {procesando ? 'Procesando compra...' : 'Confirmar y Pagar'}
                   </button>
                 )}
               </div>

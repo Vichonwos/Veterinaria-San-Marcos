@@ -2,10 +2,25 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { dataService } from '../services/dataService';
 
+// Obtiene la fecha y hora local actual en formato YYYY-MM-DDTHH:mm para el input datetime-local
+const getFechaHoraLocalActual = () => {
+  const ahora = new Date();
+  const anio = ahora.getFullYear();
+  const mes = String(ahora.getMonth() + 1).padStart(2, '0');
+  const dia = String(ahora.getDate()).padStart(2, '0');
+  const horas = String(ahora.getHours()).padStart(2, '0');
+  const minutos = String(ahora.getMinutes()).padStart(2, '0');
+  return `${anio}-${mes}-${dia}T${horas}:${minutos}`;
+};
+
 export default function Citas() {
   const session = dataService.getSession();
+  const isLoggedIn = Boolean(
+    session && (session.isLoggedIn || session.isLogged || session.token || session.role || session.user || session.email)
+  );
+
   const [formData, setFormData] = useState({
-    nombreDueno: session?.user || '',
+    nombreDueno: session?.user || session?.nombre || '',
     emailDueno: session?.email || '',
     nombreMascota: '',
     especie: '',
@@ -15,9 +30,10 @@ export default function Citas() {
   });
 
   const [mensaje, setMensaje] = useState('');
+  const [error, setError] = useState('');
 
   // Bloqueo si no hay sesión iniciada
-  if (!session?.isLogged) {
+  if (!isLoggedIn) {
     return (
       <div className="container my-5 text-center">
         <div className="card shadow-sm border-0 p-5 mx-auto" style={{ maxWidth: '550px' }}>
@@ -34,20 +50,31 @@ export default function Citas() {
     );
   }
 
+  const minFechaHora = getFechaHoraLocalActual();
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
+    if (error) setError('');
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setError('');
+
+    const ahoraLocal = getFechaHoraLocalActual();
+    if (!formData.fechaCita || new Date(formData.fechaCita) < new Date(ahoraLocal)) {
+      setError('No puedes agendar una cita en una fecha u hora anterior a la actual.');
+      return;
+    }
+
     const citasActuales = JSON.parse(localStorage.getItem('citasMedicas')) || [];
     const nuevaCita = { ...formData, id: Date.now() };
     localStorage.setItem('citasMedicas', JSON.stringify([...citasActuales, nuevaCita]));
 
     setMensaje('¡Solicitud de cita enviada con éxito!');
     setFormData({
-      nombreDueno: session.user,
-      emailDueno: session.email,
+      nombreDueno: session?.user || session?.nombre || '',
+      emailDueno: session?.email || '',
       nombreMascota: '',
       especie: '',
       servicio: '',
@@ -63,12 +90,18 @@ export default function Citas() {
       <div className="card shadow-sm border-0 p-4">
         <h2 className="fw-bold mb-2 text-center">Solicitud de Cita Médica</h2>
         <p className="text-center text-muted mb-4">
-          Bienvenido <strong>{session.user}</strong>. Completa los datos para agendar tu atención.
+          Bienvenido <strong>{session?.user || session?.nombre || session?.email}</strong>. Completa los datos para agendar tu atención.
         </p>
 
         {mensaje && (
           <div className="alert alert-success text-center fw-bold" role="alert">
             {mensaje}
+          </div>
+        )}
+
+        {error && (
+          <div className="alert alert-danger text-center fw-bold" role="alert">
+            {error}
           </div>
         )}
 
@@ -153,6 +186,7 @@ export default function Citas() {
                 type="datetime-local"
                 className="form-control"
                 id="fechaCita"
+                min={minFechaHora}
                 value={formData.fechaCita}
                 onChange={handleChange}
                 required

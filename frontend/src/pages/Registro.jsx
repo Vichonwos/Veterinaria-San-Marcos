@@ -10,16 +10,19 @@ export default function Registro() {
     edad: '',
     genero: '',
     rut: '',
+    direccion: '',
+    comuna: '',
     password: ''
   });
   const [error, setError] = useState('');
+  const [cargando, setCargando] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
@@ -35,15 +38,18 @@ export default function Registro() {
       return;
     }
 
-    const res = dataService.register({
+    setCargando(true);
+    const res = await dataService.register({
       ...formData,
       rut: formData.rut.trim().toUpperCase()
     });
+    setCargando(false);
 
     if (res.success) {
       navigate('/citas');
+      window.location.reload();
     } else {
-      setError(res.message);
+      setError(res.message || 'No se pudo crear la cuenta.');
     }
   };
 
@@ -52,7 +58,7 @@ export default function Registro() {
       <div className="card shadow-sm border-0 p-4">
         <h2 className="text-center fw-bold mb-2">Crear Cuenta Cliente</h2>
         <p className="text-center text-muted small mb-4">
-          Ingresa tus datos personales para agendar citas y comprar medicamentos.
+          Ingresa tus datos personales para agendar citas y comprar productos veterinarios.
         </p>
 
         {error && (
@@ -146,6 +152,30 @@ export default function Registro() {
               </select>
             </div>
 
+            <div className="col-md-7">
+              <label className="form-label fw-semibold">Dirección (Opcional):</label>
+              <input
+                type="text"
+                className="form-control"
+                name="direccion"
+                placeholder="Ej: Av. San Pablo 4520"
+                value={formData.direccion}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="col-md-5">
+              <label className="form-label fw-semibold">Comuna (Opcional):</label>
+              <input
+                type="text"
+                className="form-control"
+                name="comuna"
+                placeholder="Ej: Quinta Normal"
+                value={formData.comuna}
+                onChange={handleChange}
+              />
+            </div>
+
             <div className="col-md-12">
               <label className="form-label fw-semibold">Contraseña:</label>
               <input
@@ -160,8 +190,12 @@ export default function Registro() {
             </div>
 
             <div className="col-12 mt-4">
-              <button type="submit" className="btn btn-primary w-100 fw-bold py-2">
-                Crear Cuenta
+              <button
+                type="submit"
+                className="btn btn-primary w-100 fw-bold py-2"
+                disabled={cargando}
+              >
+                {cargando ? 'Creando cuenta...' : 'Crear Cuenta'}
               </button>
             </div>
           </div>

@@ -6,23 +6,24 @@ export default function Fichas() {
   const [citas, setCitas] = useState([]);
   const [busqueda, setBusqueda] = useState('');
   const session = dataService.getSession();
-  const isAdmin = session?.role === 'admin';
+  const rol = session?.role?.toUpperCase();
+  const tieneAcceso = rol === 'ADMIN' || rol === 'VENDEDOR';
 
   useEffect(() => {
-    if (isAdmin) {
+    if (tieneAcceso) {
       setFichas(dataService.getFichas());
       setCitas(dataService.getCitas());
     }
-  }, [isAdmin]);
+  }, [tieneAcceso]);
 
-  // Si no ha iniciado sesión como Admin, se bloquea la vista
-  if (!isAdmin) {
+  // Si no ha iniciado sesión como personal autorizado, se bloquea la vista
+  if (!tieneAcceso) {
     return (
       <div className="container my-5 text-center">
         <div className="alert alert-danger shadow-sm d-inline-block p-4" style={{ maxWidth: '500px' }}>
           <h4 className="fw-bold">Acceso Restringido</h4>
           <p className="mb-0">
-            Restringido exclusivamente para personal autorizado. Debes iniciar sesión como <strong>Administrador</strong>.
+            Restringido exclusivamente para personal autorizado. Debes iniciar sesión como <strong>Administrador</strong> o <strong>Vendedor</strong>.
           </p>
         </div>
       </div>

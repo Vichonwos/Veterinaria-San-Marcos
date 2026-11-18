@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { dataService } from '../services/dataService';
 
 export default function Navbar() {
   const navigate = useNavigate();
-  const session = dataService.getSession();
-  const isLoggedIn = Boolean(session?.isLogged);
-  const isAdmin = session?.role === 'admin';
+  useLocation(); // Fuerza actualizar el Navbar al cambiar de ruta
 
+  const session = dataService.getSession();
+  const isLoggedIn = Boolean(
+    session && (session.isLoggedIn || session.token || session.role || session.user || session.email)
+  );
+  const isAdmin = session?.role === 'ADMIN' || session?.role === 'admin';
+  const isVendedor = session?.role === 'VENDEDOR';
+  const puedeVerPanel = isAdmin || isVendedor;
   const [cartCount, setCartCount] = useState(0);
 
   const updateCount = () => {
@@ -52,7 +57,7 @@ export default function Navbar() {
             </Link>
           </li>
 
-          {isAdmin && (
+          {puedeVerPanel && (
             <>
               <li className="nav-item">
                 <Link className="nav-link" to="/fichas">Fichas Clínicas</Link>
@@ -71,7 +76,9 @@ export default function Navbar() {
               </div>
             ) : (
               <div className="d-flex align-items-center gap-2">
-                <span className="text-light small">Hola, <strong>{session.user}</strong></span>
+                <span className="text-light small">
+                  Hola, <strong>{session.user || session.nombre || session.email || 'Usuario'}</strong>
+                </span>
                 <button className="btn btn-danger btn-sm px-3" onClick={handleLogout}>
                   Cerrar Sesión
                 </button>
